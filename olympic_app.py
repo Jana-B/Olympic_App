@@ -227,8 +227,8 @@ class OlympicMedalsApp:
         aggregated_country_data = (
             self.filtered_data.groupby(
                 [
-                    "country_name",                    
-                    "medal_type",
+                    "Country",                    
+                    "Medal Type",
                 ]
             )
             .size()
@@ -238,7 +238,7 @@ class OlympicMedalsApp:
 
         # Reorder the columns to have 'Gold', 'Silver', and 'Bronze'
         columns_order = [
-            "country_name",
+            "Country",
             "GOLD",
             "SILVER",
             "BRONZE",
@@ -253,7 +253,7 @@ class OlympicMedalsApp:
         st.subheader("Medals by Country")
         sort_by_country = st.selectbox(
             "Sort by (Country)",
-            ["GOLD", "SILVER", "BRONZE", "country_name"],
+            ["GOLD", "SILVER", "BRONZE", "Country"],
             index=0
         )
         
@@ -274,8 +274,8 @@ class OlympicMedalsApp:
         aggregated_athlete_data = (
             self.filtered_data.groupby(
                 [
-                    "athlete_full_name",                    
-                    "medal_type",
+                    "Athlete",                    
+                    "Medal Type",
                 ]
             )
             .size()
@@ -285,7 +285,7 @@ class OlympicMedalsApp:
 
         # Reorder the columns to have 'Gold', 'Silver', and 'Bronze'
         columns_order_athlete = [
-            "athlete_full_name",
+            "Athlete",
             "GOLD",
             "SILVER",
             "BRONZE",
@@ -323,14 +323,14 @@ class OlympicMedalsApp:
         """
          # Group by 'country_name' and sum the medals
         medal_counts = (
-            self.filtered_data.groupby("country_name")["medal_type"]
+            self.filtered_data.groupby("Country")["Medal Type"]
             .value_counts()
             .unstack(fill_value=0)
             .reset_index()
         )
 
         # Convert to long format for plotting
-        medal_counts_long = medal_counts.melt(id_vars="country_name", 
+        medal_counts_long = medal_counts.melt(id_vars="Country", 
                                             value_vars=["GOLD", "SILVER", "BRONZE"],
                                             var_name="Medal Type", 
                                             value_name="Count")
@@ -344,7 +344,7 @@ class OlympicMedalsApp:
 
         # Plot using Plotly
         fig = px.bar(medal_counts_long, 
-                    x="country_name", 
+                    x="Country", 
                     y="Count", 
                     color="Medal Type",
                     title="Medals per Country",
@@ -361,14 +361,14 @@ class OlympicMedalsApp:
         """
         # Group by 'athlete_full_name' and sum the medals
         medal_counts = (
-            self.filtered_data.groupby("athlete_full_name")["medal_type"]
+            self.filtered_data.groupby("Athlete")["Medal Type"]
             .value_counts()
             .unstack(fill_value=0)
             .reset_index()
         )
 
         # Convert to long format for plotting
-        medal_counts_long = medal_counts.melt(id_vars="athlete_full_name", 
+        medal_counts_long = medal_counts.melt(id_vars="Athlete", 
                                             value_vars=["GOLD", "SILVER", "BRONZE"],
                                             var_name="Medal Type", 
                                             value_name="Count")
@@ -382,7 +382,7 @@ class OlympicMedalsApp:
 
         # Plot using Plotly
         fig = px.bar(medal_counts_long, 
-                    x="athlete_full_name", 
+                    x="Athlete", 
                     y="Count", 
                     color="Medal Type",
                     title="Medals per Athlete",
