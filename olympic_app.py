@@ -317,9 +317,7 @@ class OlympicMedalsApp:
 
         aggregated_country_data['Medals Total'] = aggregated_country_data[1] + aggregated_country_data[2] + aggregated_country_data[3]
 
-        aggregated_country_data = replace_column_names_with_medals(aggregated_country_data)
-        
-        
+        aggregated_country_data = replace_column_names_with_medals(aggregated_country_data)        
 
         st.write("### Aggregated Medal Count by Country")
         st.dataframe(aggregated_country_data, hide_index=True)
@@ -337,6 +335,8 @@ class OlympicMedalsApp:
             .unstack(fill_value=0)
             .reset_index()
         )
+        
+        
 
         # Reorder the columns to have 'Gold', 'Silver', and 'Bronze'
         columns_order_athlete = [
@@ -351,10 +351,15 @@ class OlympicMedalsApp:
             else aggregated_athlete_data
         )
 
+    
+
         aggregated_athlete_data['Medals Total'] = aggregated_athlete_data[1] + aggregated_athlete_data[2] + aggregated_athlete_data[3]
         aggregated_athlete_data = replace_column_names_with_medals(aggregated_athlete_data)
         
         st.write("### Aggregated Medal Count by Athlete")
+    
+        aggregated_athlete_data = aggregated_athlete_data.loc[~aggregated_athlete_data['Athlete'].str.contains('TEAM')]
+
         st.dataframe(aggregated_athlete_data, hide_index=True)
         
         
@@ -405,9 +410,11 @@ class OlympicMedalsApp:
         """
         Plot the number of medals per athlete.
         """
+        athlete_data = self.filtered_data.loc[~self.filtered_data['Athlete'].str.contains('TEAM')]
+        
         # Group by 'athlete_full_name' and sum the medals
         medal_counts = (
-            self.filtered_data.groupby("Athlete")["Placement"]
+            athlete_data.groupby("Athlete")["Placement"]
             .value_counts()
             .unstack(fill_value=0)
             .reset_index()
