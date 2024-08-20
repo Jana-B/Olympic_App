@@ -305,9 +305,9 @@ class OlympicMedalsApp:
         # Reorder the columns to have 'Gold', 'Silver', and 'Bronze'
         columns_order = [
             "Country",
-            "GOLD",
-            "SILVER",
-            "BRONZE",
+            1,
+            2,
+            3,
         ]
         aggregated_country_data = (
             aggregated_country_data[columns_order]
@@ -315,7 +315,11 @@ class OlympicMedalsApp:
             else aggregated_country_data
         )
 
+        aggregated_country_data['Medals Total'] = aggregated_country_data[1] + aggregated_country_data[2] + aggregated_country_data[3]
+
         aggregated_country_data = replace_column_names_with_medals(aggregated_country_data)
+        
+        
 
         st.write("### Aggregated Medal Count by Country")
         st.dataframe(aggregated_country_data, hide_index=True)
@@ -337,9 +341,9 @@ class OlympicMedalsApp:
         # Reorder the columns to have 'Gold', 'Silver', and 'Bronze'
         columns_order_athlete = [
             "Athlete",
-            "GOLD",
-            "SILVER",
-            "BRONZE",
+            1,
+            2,
+            3,
         ]
         aggregated_athlete_data = (
             aggregated_athlete_data[columns_order_athlete]
@@ -347,10 +351,94 @@ class OlympicMedalsApp:
             else aggregated_athlete_data
         )
 
+        aggregated_athlete_data['Medals Total'] = aggregated_athlete_data[1] + aggregated_athlete_data[2] + aggregated_athlete_data[3]
         aggregated_athlete_data = replace_column_names_with_medals(aggregated_athlete_data)
         
         st.write("### Aggregated Medal Count by Athlete")
         st.dataframe(aggregated_athlete_data, hide_index=True)
+        
+        
+        self.plot_medals_per_country()
+        
+        self.plot_medals_per_athlete()
+        
+        
+    def plot_medals_per_country(self):
+        """
+        Plot the number of medals per country.
+        """
+         # Group by 'country_name' and sum the medals
+        medal_counts = (
+            self.filtered_data.groupby("Country")["Placement"]
+            .value_counts()
+            .unstack(fill_value=0)
+            .reset_index()
+        )
+
+        # Convert to long format for plotting
+        medal_counts_long = medal_counts.melt(id_vars="Country", 
+                                            value_vars=[1, 2, 3],
+                                            var_name="Placement", 
+                                            value_name="Count")
+
+        # Define custom colors for each medal type
+        custom_colors = {
+            1: "#FFD700",   # Gold color
+            2: "#C0C0C0", # Silver color
+            3: "#CD7F32"  # Bronze color
+        }
+
+        # Plot using Plotly
+        fig = px.bar(medal_counts_long, 
+                    x="Country", 
+                    y="Count", 
+                    color="Placement",
+                    title="Medals per Country",
+                    labels={"Country": "Country", "Count": "Number of Medals"},
+                    height=600,
+                    color_discrete_map=custom_colors)  # Apply custom colors
+        
+        st.plotly_chart(fig)
+
+
+    def plot_medals_per_athlete(self):
+        """
+        Plot the number of medals per athlete.
+        """
+        # Group by 'athlete_full_name' and sum the medals
+        medal_counts = (
+            self.filtered_data.groupby("Athlete")["Placement"]
+            .value_counts()
+            .unstack(fill_value=0)
+            .reset_index()
+        )
+
+        # Convert to long format for plotting
+        medal_counts_long = medal_counts.melt(id_vars="Athlete", 
+                                            value_vars=[1, 2, 3],
+                                            var_name="Placement", 
+                                            value_name="Count")
+
+        # Define custom colors for each medal type
+        custom_colors = {
+            1: "#FFD700",   # Gold color
+            2: "#C0C0C0", # Silver color
+            3: "#CD7F32"  # Bronze color
+        }
+
+        # Plot using Plotly
+        fig = px.bar(medal_counts_long, 
+                    x="Athlete", 
+                    y="Count", 
+                    color="Placement",
+                    title="Medals per Athlete",
+                    labels={"Athlete": "Athlete", "Count": "Number of Medals"},
+                    height=600,
+                    color_discrete_map=custom_colors)  # Apply custom colors
+
+        st.plotly_chart(fig)
+        
+        
 
     def run(self):
         """
