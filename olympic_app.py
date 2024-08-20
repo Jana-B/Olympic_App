@@ -410,7 +410,8 @@ class OlympicMedalsApp:
         """
         Plot the number of medals per athlete.
         """
-        athlete_data = self.filtered_data.loc[~self.filtered_data['Athlete'].str.contains('TEAM')]
+        
+        # athlete_data = self.filtered_data.loc[~self.filtered_data['Athlete'].str.contains('TEAM')]
         
         # Group by 'athlete_full_name' and sum the medals
         medal_counts = (
