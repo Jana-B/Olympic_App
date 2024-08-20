@@ -1,3 +1,26 @@
+"""
+Olympic Medals Analysis Application
+
+This application is designed to display and analyze data on Olympic medals, allowing users to filter and explore the data based on various parameters such as country, discipline, athlete, and more. It uses Streamlit for the user interface and Plotly for generating visualizations.
+
+Main Features:
+- Filter Olympic medal data by year, discipline, country, athlete, and more.
+- Display filtered data in a tabular format.
+- Aggregate and visualize medal counts by country and athlete.
+- Interactive sidebar for navigation and filtering options.
+
+Dependencies:
+- streamlit
+- pandas
+- plotly
+
+Usage:
+Run this script using Streamlit to start the application.
+
+Example:
+    $ streamlit run olympic_medals_app.py
+"""
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -6,61 +29,15 @@ class OlympicMedalsApp:
     def __init__(self):
         """
         Initialize the OlympicMedalsApp class.
-        This includes loading the data and setting up the Streamlit app components.
+
+        This includes loading the Olympic medals data from an Excel file and setting up 
+        the initial state of the application, including the data view and filtering options.
         """
         self.data_path = "data/olympic_medals.xlsx"
         self.olympic_medals = self.get_data()
         self.olympic_medals, self.filtered_data = self.transform_for_display()
         self.view = "Filtered Data View"
 
-    @st.cache_data    
-    def transform_for_display(_self):
-        _self.olympic_medals["year"] = _self.olympic_medals["year"].astype(str)
-        _self.olympic_medals = _self.olympic_medals.loc[:, ~_self.olympic_medals.columns.str.contains("^Unnamed")]        
-        
-        # Reorder the columns in the specified sequence
-        df_olympic_medals = _self.olympic_medals[
-            [                                
-                "discipline_title",
-                "event_title",
-                "medal_code",                               
-                "athlete_full_name",
-                "country_name",
-                "country_code",
-                "participant_type",
-                "athlete_url",
-                "medal_type",
-                "year",
-                "location",
-                "event_gender",
-                "slug_game",
-            ]
-        ]
-        
-        # Rename the columns
-        df_olympic_medals = df_olympic_medals.rename(
-            columns={
-                "discipline_title": "Discipline",
-                "event_title": "Event",
-                "medal_code": "Medal",
-                "athlete_full_name": "Athlete",
-                "country_name": "Country",
-                "country_code": "Country Code",
-                "participant_type": "Participant Type",
-                "athlete_url": "Athlete URL",
-                "medal_type": "Medal Type",
-                "year": "Year",
-                "location": "Location",
-                "event_gender": "Event Gender",
-                "slug_game": "Game",
-            }
-        )
-
-        # Create a copy for the filtered data
-        df_filtered_data = df_olympic_medals.copy()
-
-        return df_olympic_medals, df_filtered_data
-    
     @st.cache_data
     def get_data(_self):
         """
@@ -72,10 +49,88 @@ class OlympicMedalsApp:
         df = pd.read_excel(_self.data_path, index_col=None)
         return df
     
+
+    @st.cache_data    
+    def transform_for_display(_self):
+        """
+        Transform and clean the Olympic medals data for display.
+
+        This method prepares the data by:
+        - Converting the year to a string format.
+        - Removing any unnamed columns.
+        - Reordering and renaming columns for easier analysis and display.
+
+        Returns:
+            pd.DataFrame: Cleaned and transformed DataFrame ready for display.
+            pd.DataFrame: A copy of the cleaned DataFrame for further filtering.   
+        """
+        def format_slug(slug):
+            """ 
+            Transform and clean the Game column for display.
+            
+            This method prepares the data by:
+            - Splitting the slug at the last hyphen "-".
+            - Capitalizing the location.
+            - Reordering by placing the year before the location.
+            """
+            # Split the string by the hyphen
+            parts = slug.rsplit('-', 1)
+            # Check if the second part is numeric
+            if len(parts) == 2 and parts[1].isdigit():
+                location = parts[0]
+                year = parts[1]
+            # Capitalize the first letter of the location
+            location = location.capitalize()
+            # Return the formatted string
+            return f"{year} {location}"
+        
+        _self.olympic_medals["year"] = _self.olympic_medals["year"].astype(str)
+        _self.olympic_medals["slug_game"] = _self.olympic_medals['slug_game'].apply(format_slug)
+        _self.olympic_medals = _self.olympic_medals.loc[:, ~_self.olympic_medals.columns.str.contains("^Unnamed")]        
+        
+        
+        
+        # Reorder the columns in the specified sequence
+        df_olympic_medals = _self.olympic_medals[
+            [                                
+                "slug_game",
+                "medal_code",
+                "athlete_full_name",
+                "country_name",
+                "discipline_title",
+                "event_title",
+                "event_gender",
+                "participant_type",
+                "year"
+            ]
+        ]
+        
+        # Rename the columns
+        df_olympic_medals = df_olympic_medals.rename(
+            columns={
+                "slug_game": "Game",
+                "medal_code": "Placement",
+                "athlete_full_name": "Athlete",
+                "country_name": "Country",
+                "discipline_title": "Discipline",
+                "event_title": "Event",
+                "event_gender": "Event Gender",
+                "participant_type": "Participant Type",
+                "year": "Year",
+            }
+        )
+
+        # Create a copy for the filtered data
+        df_filtered_data = df_olympic_medals.copy()
+
+        return df_olympic_medals, df_filtered_data
+    
     def render_sidebar(self):
         """
-        Render the sidebar with navigation options and filtering options.
-        This method includes filters for year or year range, location, discipline, event gender, medal type, and country.
+        Render the Streamlit sidebar with navigation and filtering options.
+
+        The sidebar allows users to navigate between different views of the data and 
+        apply filters such as year, discipline, event gender, and country to refine the data.
         """
         st.sidebar.header("Navigation")
         self.view = st.sidebar.radio(
@@ -93,38 +148,26 @@ class OlympicMedalsApp:
                 max_value=int(self.olympic_medals["Year"].max()),
                 value=(2000, 2024),
             )
-            year = None
+         
         else:
-            year = st.sidebar.selectbox(
-                "Select Year",
-                options=[None] + sorted(self.olympic_medals["Year"].unique()),
-                index=len(self.olympic_medals["Year"].unique()),
-            )
             start_year, end_year = None, None
 
         # Sidebar filters
         game = st.sidebar.multiselect(
             "Game", sorted(self.olympic_medals["Game"].unique())
         )
-        # location = st.sidebar.multiselect(
-        #     "Location", sorted(self.olympic_medals["Location"].unique())
-        # )
-        
-        # athlete = st.sidebar.multiselect(
-        #     "Athlete", sorted(self.olympic_medals["Athlete"].unique())
-        # )
+        athlete = st.sidebar.multiselect(
+            "Athlete", sorted(self.olympic_medals["Athlete"].unique(), key=str)
+        )
         
         participant_type = st.sidebar.multiselect(
             "Participant Type", sorted(self.olympic_medals["Participant Type"].unique())
         )
-
-      
         event_gender = st.sidebar.multiselect(
             "Event Gender", sorted(self.olympic_medals["Event Gender"].unique())
         )
-        
-        medal_type = st.sidebar.multiselect(
-            "Medal Type", sorted(self.olympic_medals["Medal Type"].unique())
+        placement = st.sidebar.multiselect(
+            "Placement", sorted(self.olympic_medals["Placement"].unique())
         )
         country = st.sidebar.multiselect(
             "Country", sorted(self.olympic_medals["Country"].unique(), key=str)
@@ -133,23 +176,17 @@ class OlympicMedalsApp:
             "Discipline", sorted(self.olympic_medals["Discipline"].unique())
         )
 
-        # Apply filters to the data to determine available event_titles
+        # Apply filters to the data to determine available event titles
         filtered_data_temp = self.olympic_medals
 
         if game:
             filtered_data_temp = filtered_data_temp[
                 filtered_data_temp["Game"].isin(game)
             ]
-        # if location:
-        #     filtered_data_temp = filtered_data_temp[
-        #         filtered_data_temp["Location"].isin(location)
-        #     ]
-        
-        # if athlete:
-        #     filtered_data_temp = filtered_data_temp[
-        #         filtered_data_temp["Athlete"].isin(athlete)
-        #     ]
-            
+        if athlete:
+            filtered_data_temp = filtered_data_temp[
+                filtered_data_temp["Athlete"].isin(athlete)
+            ]
         if discipline:
             filtered_data_temp = filtered_data_temp[
                 filtered_data_temp["Discipline"].isin(discipline)
@@ -162,20 +199,16 @@ class OlympicMedalsApp:
             filtered_data_temp = filtered_data_temp[
                 filtered_data_temp["Event Gender"].isin(event_gender)
             ]
-        if medal_type:
+        if placement:
             filtered_data_temp = filtered_data_temp[
-                filtered_data_temp["Medal Type"].isin(medal_type)
+                filtered_data_temp["Placement"].isin(placement)
             ]
         if country:
             filtered_data_temp = filtered_data_temp[
                 filtered_data_temp["Country"].isin(country)
             ]
-        if discipline:
-            filtered_data_temp = filtered_data_temp[
-                filtered_data_temp["Discipline"].isin(discipline)
-            ]
 
-        # Update the event_title filter based on the filtered data
+        # Update the event title filter based on the filtered data
         event = st.sidebar.multiselect(
             "Event Title", sorted(filtered_data_temp["Event"].unique())
         )
@@ -183,9 +216,8 @@ class OlympicMedalsApp:
         # Apply filters to the data
         self.filtered_data = self.olympic_medals
 
-        if year:
-            self.filtered_data = self.filtered_data[self.filtered_data["Year"] == year]
-        elif start_year and end_year:
+  
+        if start_year and end_year:
             self.filtered_data = self.filtered_data[
                 (self.filtered_data["Year"].astype(int) >= start_year)
                 & (self.filtered_data["Year"].astype(int) <= end_year)
@@ -195,16 +227,10 @@ class OlympicMedalsApp:
             self.filtered_data = self.filtered_data[
                 self.filtered_data["Game"].isin(game)
             ]
-        # if location:
-        #     self.filtered_data = self.filtered_data[
-        #         self.filtered_data["Location"].isin(location)
-        #     ]
-        
-        # if athlete:
-        #     self.filtered_data = self.filtered_data[
-        #         self.filtered_data["Athlete"].isin(athlete)
-        #     ]
-        
+        if athlete:
+            self.filtered_data = self.filtered_data[
+                self.filtered_data["Athlete"].isin(athlete)
+            ]
         if discipline:
             self.filtered_data = self.filtered_data[
                 self.filtered_data["Discipline"].isin(discipline)
@@ -217,9 +243,9 @@ class OlympicMedalsApp:
             self.filtered_data = self.filtered_data[
                 self.filtered_data["Event Gender"].isin(event_gender)
             ]
-        if medal_type:
+        if placement:
             self.filtered_data = self.filtered_data[
-                self.filtered_data["Medal Type"].isin(medal_type)
+                self.filtered_data["Placement"].isin(placement)
             ]
         if country:
             self.filtered_data = self.filtered_data[
@@ -233,16 +259,20 @@ class OlympicMedalsApp:
     def render_data_view(self):
         """
         Render the filtered data and display it in the Streamlit app.
+
+        This method displays the Olympic medals data in a tabular format based on the 
+        filters applied by the user. It also shows the number of records after filtering.
         """
         st.title("Olympic Medalists Filter")
         st.write(f"Number of records: {self.filtered_data.shape[0]}")
-        st.dataframe(self.filtered_data,hide_index=True)
+        st.dataframe(self.filtered_data, hide_index=True)
 
     def render_aggregate_view(self):
         """
         Render an aggregate view of Olympic medals by country, discipline, game, and medal type.
-        This view sums the number of gold, silver, and bronze medals for each combination of country, discipline, and game,
-        and orders them with gold first, followed by silver and bronze. It also provides an aggregated view by athlete.
+
+        This view groups and sums the number of gold, silver, and bronze medals for each 
+        combination of country, discipline, and game. It also provides an aggregated view by athlete.
         """
         st.title("Olympic Medals Aggregated View")
 
@@ -272,28 +302,10 @@ class OlympicMedalsApp:
             else aggregated_country_data
         )
 
-        # Sorting options for country view
-        st.subheader("Medals by Country")
-        sort_by_country = st.selectbox(
-            "Sort by (Country)",
-            ["GOLD", "SILVER", "BRONZE", "Country"],
-            index=0
-        )
-        
-        sort_order_country = st.radio(
-            "Sort order (Country)",
-            ("Descending", "Ascending"),
-            index=0,
-            key="country_order"
-        )
-        
-        ascending_country = True if sort_order_country == "Ascending" else False
-        aggregated_country_data = aggregated_country_data.sort_values(by=sort_by_country, ascending=ascending_country)
+        st.write("### Aggregated Medal Count by Country")
+        st.dataframe(aggregated_country_data, hide_index=True)
 
-        # Show the top 10 countries
-        st.dataframe(aggregated_country_data.head(10))
-
-        # Group by 'athlete_full_name' and 'medal_type'
+        # Aggregate data by 'athlete_full_name' and 'medal_type'
         aggregated_athlete_data = (
             self.filtered_data.groupby(
                 [
@@ -319,106 +331,15 @@ class OlympicMedalsApp:
             else aggregated_athlete_data
         )
 
-        # Sorting options for athlete view
-        st.subheader("Medals by Athlete")
-        sort_by_athlete = st.selectbox(
-            "Sort by (Athlete)",
-            ["GOLD", "SILVER", "BRONZE", "athlete_full_name"],
-            index=0
-        )
-        
-        sort_order_athlete = st.radio(
-            "Sort order (Athlete)",
-            ("Descending", "Ascending"),
-            index=0,
-            key="athlete_order"
-        )
-        
-        ascending_athlete = True if sort_order_athlete == "Ascending" else False
-        aggregated_athlete_data = aggregated_athlete_data.sort_values(by=sort_by_athlete, ascending=ascending_athlete)
-
-        # Show the top 10 athletes
-        st.dataframe(aggregated_athlete_data.head(10))
-
-    def plot_medals_per_country(self):
-        """
-        Plot the number of medals per country.
-        """
-         # Group by 'country_name' and sum the medals
-        medal_counts = (
-            self.filtered_data.groupby("Country")["Medal Type"]
-            .value_counts()
-            .unstack(fill_value=0)
-            .reset_index()
-        )
-
-        # Convert to long format for plotting
-        medal_counts_long = medal_counts.melt(id_vars="Country", 
-                                            value_vars=["GOLD", "SILVER", "BRONZE"],
-                                            var_name="Medal Type", 
-                                            value_name="Count")
-
-        # Define custom colors for each medal type
-        custom_colors = {
-            "GOLD": "#FFD700",   # Gold color
-            "SILVER": "#C0C0C0", # Silver color
-            "BRONZE": "#CD7F32"  # Bronze color
-        }
-
-        # Plot using Plotly
-        fig = px.bar(medal_counts_long, 
-                    x="Country", 
-                    y="Count", 
-                    color="Medal Type",
-                    title="Medals per Country",
-                    labels={"country_name": "Country", "Count": "Number of Medals"},
-                    height=600,
-                    color_discrete_map=custom_colors)  # Apply custom colors
-        
-        st.plotly_chart(fig)
-
-
-    def plot_medals_per_athlete(self):
-        """
-        Plot the number of medals per athlete.
-        """
-        # Group by 'athlete_full_name' and sum the medals
-        medal_counts = (
-            self.filtered_data.groupby("Athlete")["Medal Type"]
-            .value_counts()
-            .unstack(fill_value=0)
-            .reset_index()
-        )
-
-        # Convert to long format for plotting
-        medal_counts_long = medal_counts.melt(id_vars="Athlete", 
-                                            value_vars=["GOLD", "SILVER", "BRONZE"],
-                                            var_name="Medal Type", 
-                                            value_name="Count")
-
-        # Define custom colors for each medal type
-        custom_colors = {
-            "GOLD": "#FFD700",   # Gold color
-            "SILVER": "#C0C0C0", # Silver color
-            "BRONZE": "#CD7F32"  # Bronze color
-        }
-
-        # Plot using Plotly
-        fig = px.bar(medal_counts_long, 
-                    x="Athlete", 
-                    y="Count", 
-                    color="Medal Type",
-                    title="Medals per Athlete",
-                    labels={"athlete_full_name": "Athlete", "Count": "Number of Medals"},
-                    height=600,
-                    color_discrete_map=custom_colors)  # Apply custom colors
-
-        st.plotly_chart(fig)
-
+        st.write("### Aggregated Medal Count by Athlete")
+        st.dataframe(aggregated_athlete_data, hide_index=True)
 
     def run(self):
         """
-        Run the Streamlit app by rendering the sidebar, and switching between the data view, aggregate view, and plot view.
+        Run the Streamlit application.
+
+        This method coordinates the rendering of the sidebar and the main view based on the 
+        selected view (filtered data view or aggregated data view).
         """
         self.render_sidebar()
 
@@ -426,9 +347,6 @@ class OlympicMedalsApp:
             self.render_data_view()
         elif self.view == "Aggregated Data View":
             self.render_aggregate_view()
-            self.plot_medals_per_country()
-            self.plot_medals_per_athlete()
-
 
 if __name__ == "__main__":
     app = OlympicMedalsApp()
