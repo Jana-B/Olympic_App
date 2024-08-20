@@ -25,6 +25,18 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+
+def replace_column_names_with_medals(df):
+    medal_mapping = {
+        1: "🥇",  # Gold Medal
+        2: "🥈",  # Silver Medal
+        3: "🥉"   # Bronze Medal
+    }
+    # Replace the column names
+    df = df.rename(columns=medal_mapping)
+    return df
+
+
 class OlympicMedalsApp:
     def __init__(self):
         """
@@ -266,6 +278,7 @@ class OlympicMedalsApp:
         st.title("Olympic Medalists Filter")
         st.write(f"Number of records: {self.filtered_data.shape[0]}")
         st.dataframe(self.filtered_data, hide_index=True)
+        
 
     def render_aggregate_view(self):
         """
@@ -281,7 +294,7 @@ class OlympicMedalsApp:
             self.filtered_data.groupby(
                 [
                     "Country",                    
-                    "Medal Type",
+                    "Placement",
                 ]
             )
             .size()
@@ -302,15 +315,18 @@ class OlympicMedalsApp:
             else aggregated_country_data
         )
 
+        aggregated_country_data = replace_column_names_with_medals(aggregated_country_data)
+
         st.write("### Aggregated Medal Count by Country")
         st.dataframe(aggregated_country_data, hide_index=True)
+
 
         # Aggregate data by 'athlete_full_name' and 'medal_type'
         aggregated_athlete_data = (
             self.filtered_data.groupby(
                 [
                     "Athlete",                    
-                    "Medal Type",
+                    "Placement",
                 ]
             )
             .size()
@@ -331,6 +347,8 @@ class OlympicMedalsApp:
             else aggregated_athlete_data
         )
 
+        aggregated_athlete_data = replace_column_names_with_medals(aggregated_athlete_data)
+        
         st.write("### Aggregated Medal Count by Athlete")
         st.dataframe(aggregated_athlete_data, hide_index=True)
 
