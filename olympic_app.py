@@ -315,13 +315,13 @@ class OlympicMedalsApp:
         placement_columns = [1, 2, 3]
 
         # Filter only the existing placement columns. Side note: col represents the content aka data aka value and not the index of the value.
-        existing_columns_country = [col for col in placement_columns if col in aggregated_country_data.columns]
+        existing_cols = [col for col in placement_columns if col in aggregated_country_data.columns]
         
         # Ensure 'Country' column is kept separately
-        aggregated_country_data = aggregated_country_data[['Country'] + existing_columns_country]
+        aggregated_country_data = aggregated_country_data[['Country'] + existing_cols]
         
         # Calculate the total medals column
-        aggregated_country_data['Medals Total'] = aggregated_country_data[existing_columns_country].sum(axis=1)
+        aggregated_country_data['Medals Total'] = aggregated_country_data[existing_cols].sum(axis=1)
   
       
         aggregated_country_data = replace_column_names_with_medals(aggregated_country_data)        
@@ -360,13 +360,13 @@ class OlympicMedalsApp:
         # aggregated_athlete_data['Medals Total'] = aggregated_athlete_data[1] + aggregated_athlete_data[2] + aggregated_athlete_data[3]
         
         # Filter only the existing placement columns for athletes
-        existing_columns_athlete = [col for col in placement_columns if col in aggregated_athlete_data.columns]
+        existing_cols = [col for col in placement_columns if col in aggregated_athlete_data.columns]
 
         # Ensure 'Athlete' column is kept separately
-        aggregated_athlete_data = aggregated_athlete_data[['Athlete'] + existing_columns_athlete]
+        aggregated_athlete_data = aggregated_athlete_data[['Athlete'] + existing_cols]
 
         # Calculate the total medals column
-        aggregated_athlete_data['Medals Total'] = aggregated_athlete_data[existing_columns_athlete].sum(axis=1)
+        aggregated_athlete_data['Medals Total'] = aggregated_athlete_data[existing_cols].sum(axis=1)
         
       
         aggregated_athlete_data = replace_column_names_with_medals(aggregated_athlete_data)
@@ -377,13 +377,13 @@ class OlympicMedalsApp:
 
         st.dataframe(aggregated_athlete_data, hide_index=True)
         
-        # pass variables existing_columns_country and existing_columns_athlete to the next plotting functions
-        self.plot_medals_per_country(existing_columns_country)
+        # pass variables existing_cols to the next plotting functions
+        self.plot_medals_per_country(existing_cols)
         
-        self.plot_medals_per_athlete(existing_columns_athlete)
+        self.plot_medals_per_athlete(existing_cols)
         
         
-    def plot_medals_per_country(self, existing_columns_country):
+    def plot_medals_per_country(self, existing_cols):
         """
         Plot the number of medals per country.
         """
@@ -397,7 +397,7 @@ class OlympicMedalsApp:
 
         # Convert to long format for plotting
         medal_counts_long = medal_counts.melt(id_vars="Country", 
-                                            value_vars=existing_columns_country,
+                                            value_vars=existing_cols,
                                             var_name="Placement", 
                                             value_name="Count")
 
@@ -421,7 +421,7 @@ class OlympicMedalsApp:
         st.plotly_chart(fig)
 
 
-    def plot_medals_per_athlete(self, existing_columns_athlete):
+    def plot_medals_per_athlete(self, existing_cols):
         """
         Plot the number of medals per athlete.
         """
@@ -437,7 +437,7 @@ class OlympicMedalsApp:
         
         # Convert to long format for plotting
         medal_counts_long = medal_counts.melt(id_vars="Athlete", 
-                                            value_vars=existing_columns_athlete,
+                                            value_vars=existing_cols,
                                             var_name="Placement", 
                                             value_name="Count")
 
