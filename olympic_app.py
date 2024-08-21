@@ -50,7 +50,7 @@ class OlympicMedalsApp:
         self.olympic_medals, self.filtered_data = self.transform_for_display()
         self.view = "Filtered Data View"
 
-    @st.cache_data
+    #@st.cache_data
     def get_data(_self):
         """
         Load the Olympic medals data from an Excel file.
@@ -62,7 +62,7 @@ class OlympicMedalsApp:
         return df
     
 
-    @st.cache_data    
+    #@st.cache_data    
     def transform_for_display(_self):
         """
         Transform and clean the Olympic medals data for display.
