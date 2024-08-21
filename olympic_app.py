@@ -306,26 +306,17 @@ class OlympicMedalsApp:
             .reset_index()
         )
         
-        # aggregated_country_data = (
-        #     aggregated_country_data[columns_order]
-        #     if all(col in aggregated_country_data.columns for col in columns_order)
-        #     else aggregated_country_data
-        # )
-        # aggregated_country_data['Medals Total'] = aggregated_country_data[1] + aggregated_country_data[2] + aggregated_country_data[3]
-         # Calculate the total medals column
-         
-
         # Columns for medals (only numeric placements)
         placement_columns = [1, 2, 3]
 
         # Filter only the existing placement columns. Side note: col represents the content aka data aka value and not the index of the value.
-        existing_cols = [col for col in placement_columns if col in aggregated_country_data.columns]
+        existing_placement_cols = [col for col in placement_columns if col in aggregated_country_data.columns]
         
         # Ensure 'Country' column is kept separately
-        aggregated_country_data = aggregated_country_data[['Country'] + existing_cols]
+        aggregated_country_data = aggregated_country_data[['Country'] + existing_placement_cols]
         
         # Calculate the total medals column
-        aggregated_country_data['Medals Total'] = aggregated_country_data[existing_cols].sum(axis=1)
+        aggregated_country_data['Medals Total'] = aggregated_country_data[existing_placement_cols].sum(axis=1)
   
       
         aggregated_country_data = replace_column_names_with_medals(aggregated_country_data)        
@@ -347,30 +338,11 @@ class OlympicMedalsApp:
             .reset_index()
         )
         
-        
-
-        # # Reorder the columns to have 'Gold', 'Silver', and 'Bronze'
-        # columns_order_athlete = [
-        #     "Athlete",
-        #     1,
-        #     2,
-        #     3,
-        # ]
-          # aggregated_athlete_data = (
-        #     aggregated_athlete_data[columns_order_athlete]
-        #     if all(col in aggregated_athlete_data.columns for col in columns_order_athlete)
-        #     else aggregated_athlete_data
-        # )
-        # aggregated_athlete_data['Medals Total'] = aggregated_athlete_data[1] + aggregated_athlete_data[2] + aggregated_athlete_data[3]
-        
-        # Filter only the existing placement columns for athletes
-        existing_cols = [col for col in placement_columns if col in aggregated_athlete_data.columns]
-
         # Ensure 'Athlete' column is kept separately
-        aggregated_athlete_data = aggregated_athlete_data[['Athlete'] + existing_cols]
+        aggregated_athlete_data = aggregated_athlete_data[['Athlete'] + existing_placement_cols]
 
         # Calculate the total medals column
-        aggregated_athlete_data['Medals Total'] = aggregated_athlete_data[existing_cols].sum(axis=1)
+        aggregated_athlete_data['Medals Total'] = aggregated_athlete_data[existing_placement_cols].sum(axis=1)
         
       
         aggregated_athlete_data = replace_column_names_with_medals(aggregated_athlete_data)
@@ -382,12 +354,12 @@ class OlympicMedalsApp:
         st.dataframe(aggregated_athlete_data, hide_index=True)
         
         # pass variables existing_cols to the next plotting functions
-        self.plot_medals_per_country(existing_cols)
+        self.plot_medals_per_country(existing_placement_cols)
         
-        self.plot_medals_per_athlete(existing_cols)
+        self.plot_medals_per_athlete(existing_placement_cols)
         
         
-    def plot_medals_per_country(self, existing_cols):
+    def plot_medals_per_country(self, existing_placement_cols):
         """
         Plot the number of medals per country.
         """
@@ -401,7 +373,7 @@ class OlympicMedalsApp:
 
         # Convert to long format for plotting
         medal_counts_long = medal_counts.melt(id_vars="Country", 
-                                            value_vars=existing_cols,
+                                            value_vars=existing_placement_cols,
                                             var_name="Placement", 
                                             value_name="Count")
 
@@ -425,7 +397,7 @@ class OlympicMedalsApp:
         st.plotly_chart(fig)
 
     # pass existing_cols to the next function
-    def plot_medals_per_athlete(self, existing_cols):
+    def plot_medals_per_athlete(self, existing_placement_cols):
         """
         Plot the number of medals per athlete.
         """
@@ -441,7 +413,7 @@ class OlympicMedalsApp:
         
         # Convert to long format for plotting
         medal_counts_long = medal_counts.melt(id_vars="Athlete", 
-                                            value_vars=existing_cols,
+                                            value_vars=existing_placement_cols,
                                             var_name="Placement", 
                                             value_name="Count")
 
