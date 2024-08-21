@@ -49,6 +49,7 @@ olympic_medals_2024_mapped['slug_game'] = 'paris-2024'
 olympic_medals_2024_mapped['discipline_title'] = olympic_medals_2024_mapped['discipline']
 olympic_medals_2024_mapped['event_title'] = olympic_medals_2024_mapped['event']
 
+
 # Mapping event gender
 def map_gender(gender):
     if pd.isna(gender):
@@ -60,6 +61,8 @@ def map_gender(gender):
     return 'Mixed'
 
 olympic_medals_2024_mapped['event_gender'] = olympic_medals_2024_mapped['gender'].apply(map_gender)
+
+
 
 # Mapping medal type
 def map_medal_type(medal_type):
@@ -85,9 +88,7 @@ olympic_medals_2024_mapped['athlete_full_name'] = olympic_medals_2024_mapped['na
 olympic_medals_2024_mapped['country_name'] = olympic_medals_2024_mapped['country'].replace('United States', 'United States of America')
 olympic_medals_2024_mapped['country_code'] = olympic_medals_2024_mapped['country_code']
 olympic_medals_2024_mapped['country_3_letter_code'] = olympic_medals_2024_mapped['code']  # Assuming 'code' is a 3-letter code
-# Mapping participant gender categories
-olympic_medals_2024_mapped['event_gender'] = olympic_medals_2024_mapped['event_gender'].replace('Men', 'Male')
-olympic_medals_2024_mapped['event_gender'] = olympic_medals_2024_mapped['event_gender'].replace('Women', 'Female')
+
 
 # Select only the columns that exist in the olympic_medals DataFrame
 olympic_medals_2024_mapped = olympic_medals_2024_mapped[[
@@ -110,6 +111,11 @@ olympic_medals_combined.dropna(subset=['year'], inplace=True)
 
 # Now sort the DataFrame by the 'year' column
 olympic_medals_combined_sorted = olympic_medals_combined.sort_values(by='year',ascending=False)
+
+# Mapping participant gender categories to a more unified format
+olympic_medals_combined['event_gender'] = olympic_medals_combined['event_gender'].replace('Men', 'Male')
+olympic_medals_combined['event_gender'] = olympic_medals_combined['event_gender'].replace('Women', 'Female')
+
 
 # Medal mapping
 # Define the mapping of medal types to codes
@@ -156,6 +162,8 @@ def format_athlete_name(name):
 
 # Apply the formatting function to the column
 olympic_medals_combined['athlete_full_name'] = olympic_medals_combined['athlete_full_name'].apply(format_athlete_name)
+
+
 
 # Export
 olympic_medals_combined.to_excel('data/olympic_medals.xlsx')
