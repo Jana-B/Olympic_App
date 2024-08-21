@@ -267,6 +267,10 @@ class OlympicMedalsApp:
             self.filtered_data = self.filtered_data[
                 self.filtered_data["Event"].isin(event)
             ]
+    
+        if st.sidebar.button('Clear cache'):
+            self.get_data.clear()
+            self.transform_for_display.clear()
         
     def render_data_view(self):
         """
