@@ -301,22 +301,29 @@ class OlympicMedalsApp:
             .unstack(fill_value=0)
             .reset_index()
         )
+        
+        # aggregated_country_data = (
+        #     aggregated_country_data[columns_order]
+        #     if all(col in aggregated_country_data.columns for col in columns_order)
+        #     else aggregated_country_data
+        # )
+        # aggregated_country_data['Medals Total'] = aggregated_country_data[1] + aggregated_country_data[2] + aggregated_country_data[3]
+         # Calculate the total medals column
+         
 
-        # Reorder the columns to have 'Gold', 'Silver', and 'Bronze'
-        columns_order = [
-            "Country",
-            1,
-            2,
-            3,
-        ]
-        aggregated_country_data = (
-            aggregated_country_data[columns_order]
-            if all(col in aggregated_country_data.columns for col in columns_order)
-            else aggregated_country_data
-        )
+        # Columns for medals (only numeric placements)
+        placement_columns = [1, 2, 3]
 
-        aggregated_country_data['Medals Total'] = aggregated_country_data[1] + aggregated_country_data[2] + aggregated_country_data[3]
-
+        # Filter only the existing placement columns. Side note: col represents the content aka data aka value and not the index of the value.
+        existing_columns = [col for col in placement_columns if col in aggregated_country_data.columns]
+        
+        # Ensure 'Country' column is kept separately
+        aggregated_country_data = aggregated_country_data[['Country'] + existing_columns]
+        
+        # Calculate the total medals column
+        aggregated_country_data['Medals Total'] = aggregated_country_data[existing_columns].sum(axis=1)
+  
+      
         aggregated_country_data = replace_column_names_with_medals(aggregated_country_data)        
 
         st.write("### Aggregated Medal Count by Country")
@@ -338,22 +345,30 @@ class OlympicMedalsApp:
         
         
 
-        # Reorder the columns to have 'Gold', 'Silver', and 'Bronze'
-        columns_order_athlete = [
-            "Athlete",
-            1,
-            2,
-            3,
-        ]
-        aggregated_athlete_data = (
-            aggregated_athlete_data[columns_order_athlete]
-            if all(col in aggregated_athlete_data.columns for col in columns_order_athlete)
-            else aggregated_athlete_data
-        )
+        # # Reorder the columns to have 'Gold', 'Silver', and 'Bronze'
+        # columns_order_athlete = [
+        #     "Athlete",
+        #     1,
+        #     2,
+        #     3,
+        # ]
+          # aggregated_athlete_data = (
+        #     aggregated_athlete_data[columns_order_athlete]
+        #     if all(col in aggregated_athlete_data.columns for col in columns_order_athlete)
+        #     else aggregated_athlete_data
+        # )
+        # aggregated_athlete_data['Medals Total'] = aggregated_athlete_data[1] + aggregated_athlete_data[2] + aggregated_athlete_data[3]
+        
+        # Filter only the existing placement columns for athletes
+        existing_columns_athlete = [col for col in placement_columns if col in aggregated_athlete_data.columns]
 
-    
+        # Ensure 'Athlete' column is kept separately
+        aggregated_athlete_data = aggregated_athlete_data[['Athlete'] + existing_columns_athlete]
 
-        aggregated_athlete_data['Medals Total'] = aggregated_athlete_data[1] + aggregated_athlete_data[2] + aggregated_athlete_data[3]
+        # Calculate the total medals column
+        aggregated_athlete_data['Medals Total'] = aggregated_athlete_data[existing_columns_athlete].sum(axis=1)
+        
+      
         aggregated_athlete_data = replace_column_names_with_medals(aggregated_athlete_data)
         
         st.write("### Aggregated Medal Count by Athlete")
