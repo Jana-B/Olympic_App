@@ -184,12 +184,12 @@ class OlympicMedalsApp:
         country = st.sidebar.multiselect(
             "Country", sorted(self.olympic_medals["Country"].unique(), key=str)
         )
-        discipline = st.sidebar.multiselect(
-            "Discipline", sorted(self.olympic_medals["Discipline"].unique())
-        )
+      
 
         # Apply filters to the data to determine available event titles
         filtered_data_temp = self.olympic_medals
+        
+        discipline = []
 
         if game:
             filtered_data_temp = filtered_data_temp[
@@ -221,6 +221,10 @@ class OlympicMedalsApp:
             ]
 
         # Update the event title filter based on the filtered data
+        discipline = st.sidebar.multiselect(
+            "Discipline", sorted(filtered_data_temp["Discipline"].unique())
+        )
+        
         event = st.sidebar.multiselect(
             "Event Title", sorted(filtered_data_temp["Event"].unique())
         )
