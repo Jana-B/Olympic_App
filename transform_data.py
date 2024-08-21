@@ -85,6 +85,9 @@ olympic_medals_2024_mapped['athlete_full_name'] = olympic_medals_2024_mapped['na
 olympic_medals_2024_mapped['country_name'] = olympic_medals_2024_mapped['country'].replace('United States', 'United States of America')
 olympic_medals_2024_mapped['country_code'] = olympic_medals_2024_mapped['country_code']
 olympic_medals_2024_mapped['country_3_letter_code'] = olympic_medals_2024_mapped['code']  # Assuming 'code' is a 3-letter code
+# Mapping participant gender categories
+olympic_medals_2024_mapped['event_gender'] = olympic_medals_2024_mapped['event_gender'].replace('Men', 'Male')
+olympic_medals_2024_mapped['event_gender'] = olympic_medals_2024_mapped['event_gender'].replace('Women', 'Female')
 
 # Select only the columns that exist in the olympic_medals DataFrame
 olympic_medals_2024_mapped = olympic_medals_2024_mapped[[
