@@ -420,7 +420,7 @@ class OlympicMedalsApp:
         
         st.plotly_chart(fig)
 
-
+    # pass existing_cols to the next function
     def plot_medals_per_athlete(self, existing_cols):
         """
         Plot the number of medals per athlete.
