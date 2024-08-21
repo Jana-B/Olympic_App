@@ -4,4 +4,5 @@ olympic*2024
 .gitignore
 .Untitled-1.ipynb
 
+.DS_Store
 .venv
