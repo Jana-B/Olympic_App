@@ -168,9 +168,6 @@ class OlympicMedalsApp:
         game = st.sidebar.multiselect(
             "Game", sorted(self.olympic_medals["Game"].unique())
         )
-        athlete = st.sidebar.multiselect(
-            "Athlete", sorted(self.olympic_medals["Athlete"].unique(), key=str)
-        )
         
         participant_type = st.sidebar.multiselect(
             "Participant Type", sorted(self.olympic_medals["Participant Type"].unique())
@@ -190,14 +187,11 @@ class OlympicMedalsApp:
         filtered_data_temp = self.olympic_medals
         
         discipline = []
+        athlet = []
 
         if game:
             filtered_data_temp = filtered_data_temp[
                 filtered_data_temp["Game"].isin(game)
-            ]
-        if athlete:
-            filtered_data_temp = filtered_data_temp[
-                filtered_data_temp["Athlete"].isin(athlete)
             ]
         if discipline:
             filtered_data_temp = filtered_data_temp[
@@ -219,6 +213,10 @@ class OlympicMedalsApp:
             filtered_data_temp = filtered_data_temp[
                 filtered_data_temp["Country"].isin(country)
             ]
+
+        athlete = st.sidebar.multiselect(
+            "Athlete", sorted(filtered_data_temp["Athlete"].unique(), key=str)
+        )
 
         # Update the event title filter based on the filtered data
         discipline = st.sidebar.multiselect(
@@ -243,10 +241,7 @@ class OlympicMedalsApp:
             self.filtered_data = self.filtered_data[
                 self.filtered_data["Game"].isin(game)
             ]
-        if athlete:
-            self.filtered_data = self.filtered_data[
-                self.filtered_data["Athlete"].isin(athlete)
-            ]
+       
         if discipline:
             self.filtered_data = self.filtered_data[
                 self.filtered_data["Discipline"].isin(discipline)
@@ -266,6 +261,10 @@ class OlympicMedalsApp:
         if country:
             self.filtered_data = self.filtered_data[
                 self.filtered_data["Country"].isin(country)
+            ]
+        if athlete:
+            self.filtered_data = self.filtered_data[
+                self.filtered_data["Athlete"].isin(athlete)
             ]
         if event:
             self.filtered_data = self.filtered_data[
