@@ -186,17 +186,12 @@ class OlympicMedalsApp:
         # Apply filters to the data to determine available event titles
         filtered_data_temp = self.olympic_medals
         
-        discipline = []
-        athlet = []
-
+        # discipline = []
+        # athlete = []
         if game:
             filtered_data_temp = filtered_data_temp[
                 filtered_data_temp["Game"].isin(game)
-            ]
-        if discipline:
-            filtered_data_temp = filtered_data_temp[
-                filtered_data_temp["Discipline"].isin(discipline)
-            ]
+            ]        
         if participant_type:
             filtered_data_temp = filtered_data_temp[
                 filtered_data_temp["Participant Type"].isin(participant_type)
@@ -214,14 +209,20 @@ class OlympicMedalsApp:
                 filtered_data_temp["Country"].isin(country)
             ]
 
-        athlete = st.sidebar.multiselect(
-            "Athlete", sorted(filtered_data_temp["Athlete"].unique(), key=str)
-        )
-
         # Update the event title filter based on the filtered data
         discipline = st.sidebar.multiselect(
             "Discipline", sorted(filtered_data_temp["Discipline"].unique())
         )
+        
+        if discipline:
+            filtered_data_temp = filtered_data_temp[
+                filtered_data_temp["Discipline"].isin(discipline)
+            ]
+
+        athlete = st.sidebar.multiselect(
+            "Athlete", sorted(filtered_data_temp["Athlete"].unique(), key=str)
+        )
+
         
         event = st.sidebar.multiselect(
             "Event Title", sorted(filtered_data_temp["Event"].unique())
